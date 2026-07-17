@@ -42,7 +42,7 @@ HEADERS = {'Accept':'application/json'}
 REQUEST_TYPE = ["intensity", "regional", "generation"]
 REGION = ["england", "scotland", "wales"]
 REGION_ID = {1:"England", 2:"SP Distribution", 3:"Electricity North West", 4:"NPG North East", 5:"NPG Yorkshire", 6:"SP Manweb", 7:"WPD South Wales", 8:"WPD West Midlands", 9:"WPD East Midlands", 10:"UKPN East", 11:"WPD South West", 12:"SSE South", 13:"UKPN London", 14:"UKPN South East", 15:"England", 16:"Scotland", 17:"Wales", 18:"GB"}
-POSTCODES = 'Data\\postcodes.txt'
+POSTCODES = 'Decarbonisation\\Data\\postcodes.txt'
  
 #check functions and repeat processes used in each function
 def base_get_function(
@@ -550,6 +550,5 @@ def carbon_post_to(
 #print(carbon_post_region_fw())
  
 if __name__ == '__main__':
-    df = carbon_date_time()
+    df = carbon_post_region_fw()
     print(df)
-
