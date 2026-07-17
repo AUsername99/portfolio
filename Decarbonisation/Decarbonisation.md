@@ -17,14 +17,14 @@ The UK Carbon API tracks the carbon emmissions per kilowatt hour (kWh) in grams.
 #### - Carbon Data Now:
 This is the carbon data at the 30 min block you requested the information. It has a predicted value and an actual value.
 
-![Current Carbon Data](relative%20/Decarbonisation/Data/Current Carbon Data.png?raw=true)
+![Current Carbon Data](<Data/Current Carbon Data.png>)
 
 #### - Carbon Data Today:
 This is the carbon data tracked across the current day (date it was measured). It has a predicted value for each 30 min interval and tracks the actual value once it is measured
 
-![Carbon Data Now](relative%20Decarbonisation/Data/Carbon Data Now.png?raw=true)
+![Carbon Data Now](<Data/Carbon Data Now.png>)
 
 #### - Carbon Data of a selected date:
 The API also has access to previous days where the carbon data was recorded. The data is recorded back to 2017-09-12.
 
-![Carbon Data Selected Date](relative%20Decarbonisation/Data/Carbon Data Selected Date.png?raw=true)
+![Carbon Data Selected Date](<Data/Carbon Data Selected Date.png>)
