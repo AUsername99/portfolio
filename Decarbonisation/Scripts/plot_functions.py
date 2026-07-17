@@ -77,12 +77,11 @@ carbon_fuels = ['biomass', 'coal', 'gas', 'imports', 'other']
 post_ref = random.randrange(1,2921)
 with open('Decarbonisation\\Data\\postcodes.txt', 'r', encoding='utf-8') as postcodes:
     postcode = postcodes.readlines()
-df4 = carbon_post_region_fw(post_region='SL2', yr=year, mn=month, dy=day, fwh=48)
+df4 = carbon_post_region_fw(post_region=postcode[post_ref].strip(), yr=year, mn=month, dy=day, fwh=48)
 df4['carbon_perc'] = np.where(df4['fuel'] == 'biomass', df4['perc'], np.where(df4['fuel'] == 'gas', df4['perc'], np.where(df4['fuel'] == 'imports', df4['perc'], np.where(df4['fuel'] == 'other', df4['perc'], np.where(df4['fuel'] == 'coal', df4['perc'], 0)))))
 df4_sum = pd.DataFrame({'to':df4.groupby(df4['to'])['carbon_perc'].sum().index, 'carbs':df4.groupby(df4['to'])['carbon_perc'].sum().values})
-df4.set_index('to').join(df4_sum.set_index('to'))
-print(df4.groupby(df4['to'])['carbon_perc'].sum())
-df4['fuel_int'] = df4['intensity.forecast'] * df4['carbon_perc']/np.where(df4.groupby(df4['to'])['carbon_perc'].sum() == df4['to'], df4.groupby(df4['to'])['carbon_perc'].sum()[1], 1)
+df4 = df4.join(df4_sum.set_index('to'), on='to')
+df4['fuel_int'] = df4['intensity.forecast'] * df4['carbon_perc']/df4['carbs']
 df4.to_csv("test.csv")
 df4['to_'] = df4['to']
 df4 = df4[['fuel','fuel_int','to']].pivot(index='to',columns='fuel')

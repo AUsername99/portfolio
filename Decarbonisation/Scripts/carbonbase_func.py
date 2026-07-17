@@ -13,13 +13,13 @@ Base Functions:
 base_get_function():
  - Base get function used by all other carbon functions to fetch data from Carbon Intensity API
  
-date_check()
+date_check():
  - A check function for measuring the validity of the date entered in certain carbon functions
  
-time_check()
+time_check():
  - A check function for measuring the validity of the time entered in certain carbon functions
  
-type_check()
+type_check():
  - A check function for measuring the validity of the datatype entered in certain carbon functions
  
 Carbon Data Fetches:
