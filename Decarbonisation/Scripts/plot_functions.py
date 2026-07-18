@@ -86,12 +86,12 @@ for container in res.bar_containers:
     ax.bar_label(container, padding=3)
 
 ax.set_ylabel('Carbon Intensity (g/kWh)')
-ax.set_title(f'Carbon Data For {year}-{month}-1')
+ax.set_title(f'Carbon Data For {year}, {year-1} & {year-2} for {month}-1')
 ax.legend(loc='upper right', ncols=2)
 plt.figure(1).savefig('Decarbonisation\\Data\\Carbon Data Select Time2.png')
 
 #carbon_factors()
- 
+
 #carbon_from()
  
 #carbon_pt24h()
@@ -123,7 +123,7 @@ df4.reset_index().plot(x='to',y='fuel_int', legend=False, xlabel='Time', ylabel=
 plt.figure(1).set_figwidth(14)
 plt.figure(1).legend(loc='upper right')
 plt.figure(1).savefig('Decarbonisation\\Data\\Predicted Carbon Intensity Postcode.png')
-#plt.show()
+
  
 #carbon_post_to()
 plt.close()
@@ -132,7 +132,7 @@ date_string = str(datetime.date.today()-datetime.timedelta(days=14))
 year, month, day = map(int, date_string.split("-"))
 num_days = calendar.monthrange(year, month)[1]
 df5 = carbon_post_to(yr=year,mn=month,dy=day,post_region=postcode[post_ref].strip(),to=13)
-df5.plot(x='to',y='intensity.forecast', title=f'Predicted Carbon Intensity over time for {postcode[post_ref].strip()}')
+df5.plot(x='to',y='intensity.forecast', xlabel='Time', ylabel='Predicted Carbon Intensity (g/kWh)', title=f'Predicted Carbon Intensity over time for {postcode[post_ref].strip()}')
 plt.figure(1).set_figwidth(14)
 plt.figure(1).legend(loc='upper right')
 plt.figure(1).savefig('Decarbonisation\\Data\\Predicted Carbon Intensity Postcode2.png')
