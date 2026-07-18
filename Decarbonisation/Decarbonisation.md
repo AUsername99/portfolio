@@ -25,6 +25,13 @@ This is the carbon data tracked across the current day (date it was measured). I
 ![Carbon Data Now](<Data/Carbon Data Now.png>)
 
 #### - Carbon Data of a selected date:
-The API also has access to previous days where the carbon data was recorded. The data is recorded back to 2017-09-12.
+The API also has access to previous days where the carbon data was recorded. The data is recorded back to 2017-09-12 and has been recorded every day since.
 
 ![Carbon Data Selected Date](<Data/Carbon Data Selected Date.png>)
+
+#### - Carbon Data of a selected date & time:
+As well as previous dates, it can also focus in on certain 30 min blocks, meaning you can compare different times on the same day or different days but at the same time as well.
+
+![Carbon Data Selected Date](<Data/Carbon Data Select Time.png>)
+
+![Carbon Data Selected Date](<Data/Carbon Data Select Time2.png>)

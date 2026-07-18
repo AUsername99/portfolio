@@ -546,9 +546,7 @@ def carbon_post_to(
     else:
         return 'Error in Datatypes'
  
-#Tests:
-#print(carbon_post_region_fw())
  
 if __name__ == '__main__':
-    df = carbon_post_region_fw()
+    df = carbon_date_time()
     print(df)
