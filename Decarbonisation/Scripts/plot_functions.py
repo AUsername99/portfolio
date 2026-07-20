@@ -3,9 +3,6 @@ import pandas as pd
 import numpy as np
 import datetime
 import matplotlib.pyplot as plt
-import matplotlib.axes as maxes
-import matplotlib.transforms as mtrans
-import datetime as dt
 import calendar
 import random
 

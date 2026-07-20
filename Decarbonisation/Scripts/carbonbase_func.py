@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 import datetime as dt
-import re
+
  
 '''
 **A series of functions that generate dataframes and statistics of the carbon intensity of the UK**
