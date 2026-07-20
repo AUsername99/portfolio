@@ -2,14 +2,16 @@ import requests
 import pandas as pd
 import datetime as dt
 
- 
+# General documentation
 '''
 **A series of functions that generate dataframes and statistics of the carbon intensity of the UK**
  
 For documentation of the API, visit https://carbon-intensity.github.io/api-definitions/?python#carbon-intensity-api-v2-0-0
- 
-Base Functions:
- 
+
+---
+
+Base Get & Error Check functions:
+
 base_get_function():
  - Base get function used by all other carbon functions to fetch data from Carbon Intensity API
  
@@ -22,13 +24,27 @@ time_check():
 type_check():
  - A check function for measuring the validity of the datatype entered in certain carbon functions
  
-Carbon Data Fetches:
- 
-carbon_data_now() -->
-carbon_data_today() -->
-carbon_data_date() -->
-carbon_data_date_time() -->
-carbon_data_factors() -->
+---
+
+Carbon Data Request shells:
+
+These utilise the base_get_function to request data from the API as well as using the check functions to handle errors from incorrect inputs.
+
+carbon_data_now():
+ - Obtains the Carbon intensity data (predicted and actual) for the last 30min block
+
+carbon_data_today():
+ - Obtains the Carbon intensity data (predicted and actual) for the current date at UTC+00:00, in 30 min blocks
+
+carbon_data_date():
+ - Obtains the Carbon intensity data (predicted and actual) for the requested date at UTC+00:00, in 30 min blocks
+
+carbon_data_date_time():
+ - Obtains the Carbon intensity data (predicted and actual) for the requested 30 min block of the requested date at UTC+00:00
+
+carbon_data_factors()
+ - Obtains the Carbon Intensity generation breakdown for the current date
+
 carbon_data_from() -->
 carbon_data_pt24h() -->
 carbon_data_to() -->
@@ -36,7 +52,7 @@ carbon_data_to_block() -->
  
 '''
  
-#Static Variables:
+# Constants:
 BASE_URL = "https://api.carbonintensity.org.uk/"
 HEADERS = {'Accept':'application/json'}
 REQUEST_TYPE = ["intensity", "regional", "generation"]
@@ -44,7 +60,7 @@ REGION = ["england", "scotland", "wales"]
 REGION_ID = {1:"England", 2:"SP Distribution", 3:"Electricity North West", 4:"NPG North East", 5:"NPG Yorkshire", 6:"SP Manweb", 7:"WPD South Wales", 8:"WPD West Midlands", 9:"WPD East Midlands", 10:"UKPN East", 11:"WPD South West", 12:"SSE South", 13:"UKPN London", 14:"UKPN South East", 15:"England", 16:"Scotland", 17:"Wales", 18:"GB"}
 POSTCODES = 'Decarbonisation\\Data\\postcodes.txt'
  
-#check functions and repeat processes used in each function
+# Repeated get & check functions for error handling
 def base_get_function(
         query_URL: str = BASE_URL,
         df: bool = True
@@ -99,13 +115,13 @@ def time_check(
     except:
         return False
  
-#request shells
+# Request Shells
 def carbon_data_now(
         request_type: str = REQUEST_TYPE[0],
         df: bool = True
         ):
     '''
-    **Get Carbon data for current half hour**
+    **Get Carbon data for last half hour block**
     ---
     Get Carbon data for current half hour. All times provided in UTC (+00:00).\n
     ---
@@ -546,7 +562,7 @@ def carbon_post_to(
     else:
         return 'Error in Datatypes'
  
- 
+# Boilerplate code
 if __name__ == '__main__':
     df = carbon_factors()
     print(df)

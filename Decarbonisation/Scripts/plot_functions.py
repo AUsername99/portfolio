@@ -7,7 +7,9 @@ import calendar
 import random
 
 '''
-This is the script that runs to generate the visualisations with the latest data
+This is the script that runs to generate the visualisations with the latest data.
+
+At the moment this usually takes about 50 seconds, depending on internet connection and computer processing speeds
 '''
 
 date_string = str(datetime.date.today())
@@ -105,31 +107,61 @@ plt.figure(1).savefig('Decarbonisation\\Data\\Carbon Data Select Time2.png')
  
 #carbon_post_region_fw()
 plt.close()
-carbon_fuels = ['biomass', 'coal', 'gas', 'imports', 'other']
 post_ref = random.randrange(1,2921)
 with open('Decarbonisation\\Data\\postcodes.txt', 'r', encoding='utf-8') as postcodes:
     postcode = postcodes.readlines()
-df4 = carbon_post_region_fw(post_region=postcode[post_ref].strip(), yr=year, mn=month, dy=day, fwh=48)
-df4['carbon_perc'] = np.where(df4['fuel'] == 'biomass', df4['perc'], np.where(df4['fuel'] == 'gas', df4['perc'], np.where(df4['fuel'] == 'imports', df4['perc'], np.where(df4['fuel'] == 'other', df4['perc'], np.where(df4['fuel'] == 'coal', df4['perc'], 0)))))
-df4_sum = pd.DataFrame({'to':df4.groupby(df4['to'])['carbon_perc'].sum().index, 'carbs':df4.groupby(df4['to'])['carbon_perc'].sum().values})
-df4 = df4.join(df4_sum.set_index('to'), on='to')
-df4['fuel_int'] = df4['intensity.forecast'] * df4['carbon_perc']/df4['carbs']
-df4['to_'] = df4['to']
-df4 = df4[['fuel','fuel_int','to']].pivot(index='to',columns='fuel')
-df4.reset_index().plot(x='to',y='fuel_int', legend=False, xlabel='Time', ylabel='Predicted Carbon Intensity (g/kWh)', title=f'Predicted Carbon Intensity over time for {postcode[post_ref].strip()} across generation methods')
+df6 = carbon_post_region_fw(post_region=postcode[post_ref].strip(), yr=year, mn=month, dy=day, fwh=48)
+df6['carbon_perc'] = np.where(df6['fuel'] == 'biomass', df6['perc'], np.where(df6['fuel'] == 'gas', df6['perc'], np.where(df6['fuel'] == 'imports', df6['perc'], np.where(df6['fuel'] == 'other', df6['perc'], np.where(df6['fuel'] == 'coal', df6['perc'], 0)))))
+df6_sum = pd.DataFrame({'to':df6.groupby(df6['to'])['carbon_perc'].sum().index, 'carbs':df6.groupby(df6['to'])['carbon_perc'].sum().values})
+df6 = df6.join(df6_sum.set_index('to'), on='to')
+df6['fuel_int'] = df6['intensity.forecast'] * df6['carbon_perc']/df6['carbs']
+df6['to_'] = df6['to']
+df6 = df6[['fuel','fuel_int','to']].pivot(index='to',columns='fuel')
+df6.reset_index().plot(x='to',y='fuel_int', legend=False, xlabel='Time', ylabel='Predicted Carbon Intensity (g/kWh)', title=f'Predicted Carbon Intensity over time for {postcode[post_ref].strip()} across generation methods')
 plt.figure(1).set_figwidth(14)
 plt.figure(1).legend(loc='upper right')
 plt.figure(1).savefig('Decarbonisation\\Data\\Predicted Carbon Intensity Postcode.png')
 
- 
+plt.close()
+post_ref = random.randrange(1,2921)
+with open('Decarbonisation\\Data\\postcodes.txt', 'r', encoding='utf-8') as postcodes:
+    postcode = postcodes.readlines()
+df7 = carbon_post_region_fw(post_region=postcode[post_ref].strip(), yr=year, mn=month, dy=day, fwh=48)
+df7['carbon_perc'] = np.where(df7['fuel'] == 'biomass', df7['perc'], np.where(df7['fuel'] == 'gas', df7['perc'], np.where(df7['fuel'] == 'imports', df7['perc'], np.where(df7['fuel'] == 'other', df7['perc'], np.where(df7['fuel'] == 'coal', df7['perc'], 0)))))
+df7_sum = pd.DataFrame({'to':df7.groupby(df7['to'])['carbon_perc'].sum().index, 'carbs':df7.groupby(df7['to'])['carbon_perc'].sum().values})
+df7 = df7.join(df7_sum.set_index('to'), on='to')
+df7['fuel_int'] = df7['intensity.forecast'] * df7['carbon_perc']/df7['carbs']
+df7['to_'] = df7['to']
+df7 = df7[['fuel','fuel_int','to']].pivot(index='to',columns='fuel')
+df7.reset_index().plot(x='to',y='fuel_int', legend=False, xlabel='Time', ylabel='Predicted Carbon Intensity (g/kWh)', title=f'Predicted Carbon Intensity over time for {postcode[post_ref].strip()} across generation methods')
+plt.figure(1).set_figwidth(14)
+plt.figure(1).legend(loc='upper right')
+plt.figure(1).savefig('Decarbonisation\\Data\\Predicted Carbon Intensity Postcode1.png')
+
+plt.close()
+post_ref = random.randrange(1,2921)
+with open('Decarbonisation\\Data\\postcodes.txt', 'r', encoding='utf-8') as postcodes:
+    postcode = postcodes.readlines()
+df8 = carbon_post_region_fw(post_region=postcode[post_ref].strip(), yr=year, mn=month, dy=day, fwh=48)
+df8['carbon_perc'] = np.where(df8['fuel'] == 'biomass', df8['perc'], np.where(df8['fuel'] == 'gas', df8['perc'], np.where(df8['fuel'] == 'imports', df8['perc'], np.where(df8['fuel'] == 'other', df8['perc'], np.where(df8['fuel'] == 'coal', df8['perc'], 0)))))
+df8_sum = pd.DataFrame({'to':df8.groupby(df8['to'])['carbon_perc'].sum().index, 'carbs':df8.groupby(df8['to'])['carbon_perc'].sum().values})
+df8 = df8.join(df8_sum.set_index('to'), on='to')
+df8['fuel_int'] = df8['intensity.forecast'] * df8['carbon_perc']/df8['carbs']
+df8['to_'] = df8['to']
+df8 = df8[['fuel','fuel_int','to']].pivot(index='to',columns='fuel')
+df8.reset_index().plot(x='to',y='fuel_int', legend=False, xlabel='Time', ylabel='Predicted Carbon Intensity (g/kWh)', title=f'Predicted Carbon Intensity over time for {postcode[post_ref].strip()} across generation methods')
+plt.figure(1).set_figwidth(14)
+plt.figure(1).legend(loc='upper right')
+plt.figure(1).savefig('Decarbonisation\\Data\\Predicted Carbon Intensity Postcode2.png')
+
 #carbon_post_to()
 plt.close()
 post_ref = random.randrange(1,2921)
 date_string = str(datetime.date.today()-datetime.timedelta(days=14))
 year, month, day = map(int, date_string.split("-"))
 num_days = calendar.monthrange(year, month)[1]
-df5 = carbon_post_to(yr=year,mn=month,dy=day,post_region=postcode[post_ref].strip(),to=13)
-df5.plot(x='to',y='intensity.forecast', xlabel='Time', ylabel='Predicted Carbon Intensity (g/kWh)', title=f'Predicted Carbon Intensity over time for {postcode[post_ref].strip()}')
+df9 = carbon_post_to(yr=year,mn=month,dy=day,post_region=postcode[post_ref].strip(),to=13)
+df9.plot(x='to',y='intensity.forecast', xlabel='Time', ylabel='Predicted Carbon Intensity (g/kWh)', title=f'Predicted Carbon Intensity over time for {postcode[post_ref].strip()}')
 plt.figure(1).set_figwidth(14)
 plt.figure(1).legend(loc='upper right')
-plt.figure(1).savefig('Decarbonisation\\Data\\Predicted Carbon Intensity Postcode2.png')
+plt.figure(1).savefig('Decarbonisation\\Data\\Predicted Carbon Intensity Postcode3.png')
