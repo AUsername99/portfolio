@@ -561,8 +561,71 @@ def carbon_post_to(
             return 'Error: Date and/or Time is invalid'
     else:
         return 'Error in Datatypes'
- 
+
+# Normalising data
+def fueltype_demand(
+        fuel_type: str = '',
+        publishDateTimeFrom: str = '',
+        publishDateTimeTo: str = ''
+    ):
+    fuelR = ''
+    publishR = ''
+    if all([fuel_type, publishDateTimeFrom, publishDateTimeTo]) == '':
+        request_string = 'https://data.elexon.co.uk/bmrs/api/v1/datasets/UOU2T14D'
+    else:
+        if fuel_type != '':
+            fuelR = f'?fuel_type={fuel_type}'
+        if publishDateTimeFrom != '':
+            if fuelR != '':
+                publishR = f'&publishDateTimeFrom={publishDateTimeFrom}&publishDateTimeTo={publishDateTimeTo}'
+            else:
+                publishR = f'?publishDateTimeFrom={publishDateTimeFrom}&publishDateTimeTo={publishDateTimeTo}'
+        request_string = f'https://data.elexon.co.uk/bmrs/api/v1/datasets/UOU2T14D{fuelR}{publishR}'
+    response = requests.get(request_string, params={}, headers = HEADERS)
+    if response.status_code == 200:
+        data = response.json()
+    df0 = pd.json_normalize(data['data'])
+    return df0
+
+def energy_demand(
+        setDateFrom: str = '',
+        setDateTo: str = '',
+        setPeriod: list[int] = ''
+    ):
+    datesR = ''
+    periodR = ''
+    if all([setDateFrom, setDateTo, setPeriod]) == '':
+        request_string = 'https://data.elexon.co.uk/bmrs/api/v1/demand/outturn'
+    else:
+        if setDateFrom != '':
+            datesR = f'?settlementDateFrom={setDateFrom}&settlementDateTo={setDateTo}'
+        if setPeriod != '':
+            if datesR != '':
+                periodR = f'&settlementPeriod={setPeriod}'
+            else:
+                periodR = f'?settlementPeriod={setPeriod}'
+        request_string = f'https://data.elexon.co.uk/bmrs/api/v1/demand/outturn{datesR}{periodR}'
+    response = requests.get(request_string, params={}, headers = HEADERS)
+    if response.status_code == 200:
+        data = response.json()
+    df0 = pd.json_normalize(data['data'])
+    return df0
+
+def temp_data(
+        publishDateTimeFrom: str = '',
+        publishDateTimeTo: str = ''
+    ):
+    if publishDateTimeFrom == '':
+        request_string = 'https://data.elexon.co.uk/bmrs/api/v1/datasets/TEMP'
+    else:
+        request_string = f'https://data.elexon.co.uk/bmrs/api/v1/datasets/TEMP?publishDateTimeFrom={publishDateTimeFrom}&publishDateTimeTo={publishDateTimeTo}'
+    response = requests.get(request_string, params={}, headers = HEADERS)
+    if response.status_code == 200:
+        data = response.json()
+    df0 = pd.json_normalize(data['data'])
+    return df0
+
 # Boilerplate code
 if __name__ == '__main__':
-    df = carbon_factors()
+    df = temp_data()
     print(df)

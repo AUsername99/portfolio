@@ -18,24 +18,45 @@ num_days = calendar.monthrange(year, month)[1]
 
 time_string = str(datetime.datetime.now().time())
 
+fuelTypeNames = {
+    'COAL':'coal',
+    'CCGT':'ccgt',
+    'OCGT':'ocgt',
+    'NUCLEAR':'nuclear',
+    'OIL':'oil',
+    'WIND':'wind',
+    'NPSHYD':'hydro',
+    'PS':'pumped',
+    'BIOMASS':'biomass',
+    'BESS':'battery',
+    'OTHER':'other',
+    'INTFR':'ifa',
+    'INTIRL':'moyle',
+    'INTNED':'britned',
+    'INTEW':'ewic',
+    'INTNEM':'nemo',
+    'INTIFA2':'ifa2',
+    'INTNSL':'nsl',
+    'INTELEC':'eleclink',
+    'INTVKL':'viking',
+    'INTGRNL':'greenlink'
+    }
+
 #carbon_data_now()
 plt.close()
 df1 = carbon_data_now()
 df1.plot(kind='bar', legend=False, ylabel='Carbon Intensity (g/kWh)', title=f'Carbon Data Now {year}-{month}-{day} {time_string}')
-plt.figure(1).set_figwidth(14)
-plt.figure(1).legend(loc='upper right')
-plt.figure(1).savefig('Decarbonisation\\Data\\Current Carbon Data.png')
+plt.figure(1).legend(loc='upper right', ncol=2)
+plt.figure(1).savefig('Decarbonisation\\Data\\Visualisations\\Current Carbon Data.png')
 
- 
 #carbon_data_today()
 plt.close()
 df2 = carbon_data_today()
 df2.plot(x='to', legend=False, xlabel='time', ylabel='Carbon Intensity (g/kWh)')
 plt.figure(1).set_figwidth(14)
-plt.figure(1).legend(loc='upper right')
-plt.figure(1).savefig('Decarbonisation\\Data\\Carbon Data Now.png')
+plt.figure(1).legend(loc='upper right', ncol=2)
+plt.figure(1).savefig('Decarbonisation\\Data\\Visualisations\\Carbon Data Now.png')
 
- 
 #carbon_data_date()
 plt.close()
 i = 1
@@ -50,8 +71,8 @@ while i <= num_days:
     i = i + 1
 df0.plot(x='to', legend=False, xlabel='Time', ylabel='Carbon Intensity (g/kWh)', title='Carbon Data over the next month')
 plt.figure(1).set_figwidth(14)
-plt.figure(1).legend(loc='upper right', labels=['Forecast', 'Actual'])
-plt.figure(1).savefig('Decarbonisation\\Data\\Carbon Data Selected Date.png')
+plt.figure(1).legend(loc='upper right', labels=['Forecast', 'Actual'], ncol=2)
+plt.figure(1).savefig('Decarbonisation\\Data\\Visualisations\\Carbon Data Selected Date.png')
 #plt.show()
 
 #carbon_date_time()
@@ -70,7 +91,8 @@ for container in res.bar_containers:
 ax.set_ylabel('Carbon Intensity (g/kWh)')
 ax.set_title(f'Carbon Data For {year}-{month}-1')
 ax.legend(loc='upper right', ncols=2)
-plt.figure(1).savefig('Decarbonisation\\Data\\Carbon Data Select Time.png')
+ax.set_ybound(upper=(df4.max(axis=None, numeric_only=True)+df4.max(axis=None, numeric_only=True)*0.2))
+plt.figure(1).savefig('Decarbonisation\\Data\\Visualisations\\Carbon Data Select Time.png')
 
 plt.close()
 df5_0 = carbon_date_time(yr=(year-2), mn=month, dy=1, hr=12, min=0)
@@ -87,23 +109,8 @@ for container in res.bar_containers:
 ax.set_ylabel('Carbon Intensity (g/kWh)')
 ax.set_title(f'Carbon Data For {year}, {year-1} & {year-2} for {month}-1')
 ax.legend(loc='upper right', ncols=2)
-plt.figure(1).savefig('Decarbonisation\\Data\\Carbon Data Select Time2.png')
-
-#carbon_factors()
-
-#carbon_from()
- 
-#carbon_pt24h()
- 
-#carbon_to()
- 
-#carbon_to_block()
- 
-#carbon_regional()
- 
-#carbon_postcode()
- 
-#carbon_region_fw()
+ax.set_ybound(upper=(df5.max(axis=None, numeric_only=True)+df5.max(axis=None, numeric_only=True)*0.2))
+plt.figure(1).savefig('Decarbonisation\\Data\\Visualisations\\Carbon Data Select Time2.png')
  
 #carbon_post_region_fw()
 plt.close()
@@ -120,7 +127,7 @@ df6 = df6[['fuel','fuel_int','to']].pivot(index='to',columns='fuel')
 df6.reset_index().plot(x='to',y='fuel_int', legend=False, xlabel='Time', ylabel='Predicted Carbon Intensity (g/kWh)', title=f'Predicted Carbon Intensity over time for {postcode[post_ref].strip()} across generation methods')
 plt.figure(1).set_figwidth(14)
 plt.figure(1).legend(loc='upper right')
-plt.figure(1).savefig('Decarbonisation\\Data\\Predicted Carbon Intensity Postcode.png')
+plt.figure(1).savefig('Decarbonisation\\Data\\Visualisations\\Predicted Carbon Intensity Postcode.png')
 
 plt.close()
 post_ref = random.randrange(1,2921)
@@ -136,7 +143,7 @@ df7 = df7[['fuel','fuel_int','to']].pivot(index='to',columns='fuel')
 df7.reset_index().plot(x='to',y='fuel_int', legend=False, xlabel='Time', ylabel='Predicted Carbon Intensity (g/kWh)', title=f'Predicted Carbon Intensity over time for {postcode[post_ref].strip()} across generation methods')
 plt.figure(1).set_figwidth(14)
 plt.figure(1).legend(loc='upper right')
-plt.figure(1).savefig('Decarbonisation\\Data\\Predicted Carbon Intensity Postcode1.png')
+plt.figure(1).savefig('Decarbonisation\\Data\\Visualisations\\Predicted Carbon Intensity Postcode1.png')
 
 plt.close()
 post_ref = random.randrange(1,2921)
@@ -152,7 +159,7 @@ df8 = df8[['fuel','fuel_int','to']].pivot(index='to',columns='fuel')
 df8.reset_index().plot(x='to',y='fuel_int', legend=False, xlabel='Time', ylabel='Predicted Carbon Intensity (g/kWh)', title=f'Predicted Carbon Intensity over time for {postcode[post_ref].strip()} across generation methods')
 plt.figure(1).set_figwidth(14)
 plt.figure(1).legend(loc='upper right')
-plt.figure(1).savefig('Decarbonisation\\Data\\Predicted Carbon Intensity Postcode2.png')
+plt.figure(1).savefig('Decarbonisation\\Data\\Visualisations\\Predicted Carbon Intensity Postcode2.png')
 
 #carbon_post_to()
 plt.close()
@@ -161,7 +168,34 @@ date_string = str(datetime.date.today()-datetime.timedelta(days=14))
 year, month, day = map(int, date_string.split("-"))
 num_days = calendar.monthrange(year, month)[1]
 df9 = carbon_post_to(yr=year,mn=month,dy=day,post_region=postcode[post_ref].strip(),to=13)
-df9.plot(x='to',y='intensity.forecast', xlabel='Time', ylabel='Predicted Carbon Intensity (g/kWh)', title=f'Predicted Carbon Intensity over time for {postcode[post_ref].strip()}')
+df9.plot(x='to',y='intensity.forecast', xlabel='Time', legend=False, ylabel='Predicted Carbon Intensity (g/kWh)', title=f'Predicted Carbon Intensity over time for {postcode[post_ref].strip()}')
+plt.figure(1).set_figwidth(14)
+plt.figure(1).legend(loc='upper right', ncol=2)
+plt.figure(1).savefig('Decarbonisation\\Data\\Visualisations\\Predicted Carbon Intensity Postcode3.png')
+
+#fueltype_demand()
+plt.close()
+df10 = fueltype_demand()
+df10.replace(inplace=True, to_replace=fuelTypeNames)
+df10_pivot = pd.pivot_table(df10, values='outputUsable', index=['forecastDate'], columns=['fuelType'])
+df10_pivot.plot(legend=False, ylabel='Generation Units')
 plt.figure(1).set_figwidth(14)
 plt.figure(1).legend(loc='upper right')
-plt.figure(1).savefig('Decarbonisation\\Data\\Predicted Carbon Intensity Postcode3.png')
+plt.figure(1).savefig('Decarbonisation\\Data\\Visualisations\\fueltypeDemand.png')
+
+#energy_demand()
+plt.close()
+df11 = energy_demand()
+df11 = df11[['startTime', 'initialDemandOutturn', 'initialTransmissionSystemDemandOutturn']]
+df11.plot(legend=False, x='startTime', ylabel='Demand in MegaWatts (MW)')
+plt.figure(1).set_figwidth(14)
+plt.figure(1).legend(loc='upper right')
+plt.figure(1).savefig('Decarbonisation\\Data\\Visualisations\\Energy Demand.png')
+
+#temp_data()
+plt.close()
+df12 = temp_data()
+df12.plot(x='measurementDate', y='temperature', legend=False)
+plt.figure(1).set_figwidth(14)
+plt.figure(1).legend(loc='upper right')
+plt.figure(1).savefig('Decarbonisation\\Data\\Visualisations\\Temperature over Time.png')
