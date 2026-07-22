@@ -1,0 +1,7 @@
+To Do:
+ - Add Titles to each graph
+ - Add x labels to each graph
+ - Add y labels to each graph
+ - Add boiler plate code to plot_functions.py
+ - Create functions for CSV files (mainly transportation data)
+ - Make plans for big data visualisation (total carbon over time in the UK, break down by region and by emmissions generation type)

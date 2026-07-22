@@ -1,4 +1,4 @@
-from carbonbase_func import *
+from apiFetchFunctions import *
 import pandas as pd
 import numpy as np
 import datetime
@@ -12,11 +12,10 @@ This is the script that runs to generate the visualisations with the latest data
 At the moment this usually takes about 50 seconds, depending on internet connection and computer processing speeds
 '''
 
-date_string = str(datetime.date.today())
-year, month, day = map(int, date_string.split("-"))
-num_days = calendar.monthrange(year, month)[1]
-
-time_string = str(datetime.datetime.now().time())
+#date_string = str(datetime.date.today())
+#year, month, day = map(int, date_string.split("-"))
+#num_days = calendar.monthrange(year, month)[1]
+#time_string = str(datetime.datetime.now().time())
 
 fuelTypeNames = {
     'COAL':'coal',
@@ -43,11 +42,16 @@ fuelTypeNames = {
     }
 
 #carbon_data_now()
-plt.close()
-df1 = carbon_data_now()
-df1.plot(kind='bar', legend=False, ylabel='Carbon Intensity (g/kWh)', title=f'Carbon Data Now {year}-{month}-{day} {time_string}')
-plt.figure(1).legend(loc='upper right', ncol=2)
-plt.figure(1).savefig('Decarbonisation\\Data\\Visualisations\\Current Carbon Data.png')
+def carbonNowBar():
+    date_string = str(datetime.date.today())
+    year, month, day = map(int, date_string.split("-"))
+    num_days = calendar.monthrange(year, month)[1]
+    time_string = str(datetime.datetime.now().time())
+    plt.close()
+    df1 = carbon_data_now()
+    df1.plot(kind='bar', legend=False, ylabel='Carbon Intensity (g/kWh)', title=f'Carbon Data Now {year}-{month}-{day} {time_string}')
+    plt.figure(1).legend(loc='upper right', ncol=2)
+    plt.figure(1).savefig('Decarbonisation\\Data\\Visualisations\\Current Carbon Data.png')
 
 #carbon_data_today()
 plt.close()
@@ -58,6 +62,10 @@ plt.figure(1).legend(loc='upper right', ncol=2)
 plt.figure(1).savefig('Decarbonisation\\Data\\Visualisations\\Carbon Data Now.png')
 
 #carbon_data_date()
+date_string = str(datetime.date.today())
+year, month, day = map(int, date_string.split("-"))
+num_days = calendar.monthrange(year, month)[1]
+time_string = str(datetime.datetime.now().time())
 plt.close()
 i = 1
 while i <= num_days:

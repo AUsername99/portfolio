@@ -1,0 +1,631 @@
+import requests
+import pandas as pd
+import datetime as dt
+
+# General documentation
+'''
+**A series of functions that generate dataframes and statistics of the carbon intensity of the UK**
+ 
+For documentation of the API, visit https://carbon-intensity.github.io/api-definitions/?python#carbon-intensity-api-v2-0-0
+
+---
+
+Base Get & Error Check functions:
+
+base_get_function():
+ - Base get function used by all other carbon functions to fetch data from Carbon Intensity API
+ 
+date_check():
+ - A check function for measuring the validity of the date entered in certain carbon functions
+ 
+time_check():
+ - A check function for measuring the validity of the time entered in certain carbon functions
+ 
+type_check():
+ - A check function for measuring the validity of the datatype entered in certain carbon functions
+ 
+---
+
+Carbon Data Request shells:
+
+These utilise the base_get_function to request data from the API as well as using the check functions to handle errors from incorrect inputs.
+
+carbon_data_now():
+ - Obtains the Carbon intensity data (predicted and actual) for the last 30min block
+
+carbon_data_today():
+ - Obtains the Carbon intensity data (predicted and actual) for the current date at UTC+00:00, in 30 min blocks
+
+carbon_data_date():
+ - Obtains the Carbon intensity data (predicted and actual) for the requested date at UTC+00:00, in 30 min blocks
+
+carbon_data_date_time():
+ - Obtains the Carbon intensity data (predicted and actual) for the requested 30 min block of the requested date at UTC+00:00
+
+carbon_data_factors()
+ - Obtains the Carbon Intensity generation breakdown for the current date
+
+carbon_data_from() -->
+carbon_data_pt24h() -->
+carbon_data_to() -->
+carbon_data_to_block() -->
+ 
+'''
+ 
+# Constants:
+BASE_URL = "https://api.carbonintensity.org.uk/"
+HEADERS = {'Accept':'application/json'}
+REQUEST_TYPE = ["intensity", "regional", "generation"]
+REGION = ["england", "scotland", "wales"]
+REGION_ID = {1:"England", 2:"SP Distribution", 3:"Electricity North West", 4:"NPG North East", 5:"NPG Yorkshire", 6:"SP Manweb", 7:"WPD South Wales", 8:"WPD West Midlands", 9:"WPD East Midlands", 10:"UKPN East", 11:"WPD South West", 12:"SSE South", 13:"UKPN London", 14:"UKPN South East", 15:"England", 16:"Scotland", 17:"Wales", 18:"GB"}
+POSTCODES = 'Decarbonisation\\Data\\postcodes.txt'
+ 
+# Repeated get & check functions for error handling
+def base_get_function(
+        query_URL: str = BASE_URL,
+        df: bool = True
+        ):
+    response = requests.get(query_URL, params={}, headers = HEADERS)
+    if response.status_code == 200:
+        data = response.json()
+        if df:
+            try:
+                if REQUEST_TYPE[1] in query_URL:
+                    terms = list(REGION) + ["postcode/", "regionid/"]
+                    if "Z/postcode/" in query_URL:
+                        df0 = pd.json_normalize(data['data'], 'data', ['regionid', 'shortname'])
+                        df1 = (pd.concat({i: pd.DataFrame(x) for i, x in df0.pop('generationmix').items()}).reset_index(level=1, drop=True).join(df0).reset_index(drop=True))
+                    elif any(term in query_URL for term in terms):
+                        df0 = pd.json_normalize(data['data'], 'data', ['regionid', 'dnoregion', 'shortname'])
+                        df1 = (pd.concat({i: pd.DataFrame(x) for i, x in df0.pop('generationmix').items()}).reset_index(level=1, drop=True).join(df0).reset_index(drop=True))
+                    else:
+                        df0 = pd.json_normalize(data['data'], 'regions', ['from', 'to'])
+                        df1 = (pd.concat({i: pd.DataFrame(x) for i, x in df0.pop('generationmix').items()}).reset_index(level=1, drop=True).join(df0).reset_index(drop=True))
+                elif REQUEST_TYPE[2] in query_URL:
+                    df1 = pd.json_normalize(data['data'], 'generationmix', ['from', 'to'])
+                else:
+                    df1 = pd.json_normalize(data, record_path=['data'])
+ 
+                return df1
+            except:
+                return 'Error: cannot put request into dataframe'
+        else:
+            return data
+    else:
+        return f'Request Error: {response.status_code}'
+ 
+def date_check(
+        dy_check: int,
+        mn_check: int,
+        yr_check: int
+        ):
+    try:
+        test = dt.datetime(year=yr_check, month=mn_check, day=dy_check)
+        return test
+    except:
+        return False
+ 
+def time_check(
+        hr_check: int,
+        min_check: int
+        ):
+    try:
+        test = dt.time(hour=hr_check, minute=min_check)
+        return test
+    except:
+        return False
+ 
+# Request Shells
+def carbon_data_now(
+        request_type: str = REQUEST_TYPE[0],
+        df: bool = True
+        ):
+    '''
+    **Get Carbon data for last half hour block**
+    ---
+    Get Carbon data for current half hour. All times provided in UTC (+00:00).\n
+    ---
+    *request_type*: string - Default: "intensity" - changes the table the data is requested from:\n
+     - *intensity*: gets the carbon intensity for the current 30 min block of time
+     - *regional*: gets the current carbon intensity distribution across the UK, divided up by region & how much is generated by what generation method
+     - *generation*: gets the generation splite across the different generation methods
+   
+    *df*: bool - Default: True - determines if the requested data is returned as a Dataframe or as a JSON string.
+    '''
+    if isinstance(request_type, str) and isinstance(df, bool):
+        if request_type in REQUEST_TYPE:
+            return base_get_function(query_URL=str(BASE_URL+request_type),df=df)
+        else:
+            return 'Error: Incorrect Request Type'
+    else:
+        if type(request_type) != str:
+            return "Error: request_type is not correct datatype. Str datatype required"
+        elif type(df) != bool:
+            return "Error: df is not correct datatype. Bool datatype required"
+        else:
+            return "Error within datatypes"
+ 
+def carbon_data_today(
+        df: bool = True
+        ):
+    '''
+    **Get Carbon Intensity data for today**
+    ---
+    Get Carbon Intensity data for today. All times provided in UTC (+00:00).\n
+    ---
+    *df*: bool - Default: True - determines if the requested data is returned as a Dataframe or as a JSON string
+    '''
+    if type(df) != bool:
+        return "Error: df is not correct datatype. Bool datatype required"
+    elif isinstance(df, bool):
+        return base_get_function(query_URL=str(BASE_URL+REQUEST_TYPE[0]+"/date"),df=df)
+    else:
+        return "Error within datatypes"
+ 
+def carbon_data_date(
+        yr: int = 2017,
+        mn: int = 9,
+        dy: int = 12,
+        df: bool = True
+        ):
+    '''
+    **Gets Carbon Intensity data for specific date.**
+    ---
+    Get Carbon Intensity data for a specific date. All times provided in UTC+00:00. Default date requested is 2017-09-12 which is the earliest this request can get data from.\n
+    ---
+    *yr*: int - Default 2017 - the year of the request\n
+    *mn*: int - Default 9 - the numercal reference for the month of the request\n
+    *dy*: int - Default 12 - the day of the request\n
+    *df*: bool - Default: True - determines if the requested data is returned as a Dataframe or as a JSON string
+    '''
+    check = [
+        isinstance(yr, int),
+        isinstance(mn, int),
+        isinstance(dy, int),
+        isinstance(df, bool)
+    ]
+    if all(check):
+        if date_check(yr_check=yr, mn_check=mn, dy_check=dy) != False:
+            corrected_request_date = dt.datetime(year=yr, month=mn, day=dy)
+            corrected_request_date = dt.datetime.isoformat(corrected_request_date)
+            return base_get_function(query_URL=str(BASE_URL+REQUEST_TYPE[0]+"/date/"+corrected_request_date),df=df)
+        else:
+            return 'Error: Date is invalid'
+    else:
+        return 'Error in Datatypes'
+ 
+def carbon_date_time(
+        yr: int = 2017,
+        mn: int = 9,
+        dy: int = 13,
+        hr: int = 0,
+        min: int = 0,
+        df: bool = True
+        ):
+    '''
+    **Gets Carbon Intensity data for specific 30 min block of a date**
+    ---
+    Get Carbon Intensity data for a specific 30 min block of a date. All times provided in UTC+00:00. Default date requested is 2017-09-13 at 00:00 which is the earliest this request can get data from.\n
+    ---
+    *yr*: int - Default 2017 - the year of the request\n
+    *mn*: int - Default 9 - the numercal reference for the month of the request\n
+    *dy*: int - Default 12 - the day of the request\n
+    *hr*: int - Default 0 - hour of requested time\n
+    *min*: int - Default 0 - minute of requested time\n
+    *df*: bool - Default: True - determines if the requested data is returned as a Dataframe or as a JSON string
+    '''
+    check = [
+        isinstance(yr, int),
+        isinstance(mn, int),
+        isinstance(dy, int),
+        isinstance(hr, int),
+        isinstance(min, int),
+        isinstance(df, bool)
+    ]
+    if all(check):
+        if date_check(yr_check=yr, mn_check=mn, dy_check=dy) != False and time_check(hr_check=hr, min_check=min) != False:
+            corrected_request_date = dt.datetime(year=yr, month=mn, day=dy).isoformat()
+            t1 = dt.timedelta(hours=hr, minutes=min)
+            time_period = (t1 // dt.timedelta(minutes=30)) + 1
+            return base_get_function(query_URL=str(BASE_URL + REQUEST_TYPE[0] + "/date/" + corrected_request_date + "/" + str(time_period)),df=df)
+        else:
+            return 'Error: Date and/or Time is invalid'
+    else:
+        return 'Error in Datatypes'
+ 
+def carbon_factors(
+        df: bool = True
+        ):
+    '''
+    **Get Breakdown of Carbon data for today**
+    ---
+    Get Carbon Breakdown data for today. All times provided in UTC (+00:00).\n
+    ---
+    *df*: bool - Default: True - determines if the requested data is returned as a Dataframe or as a JSON string
+    '''  
+    if isinstance(df, bool):
+        return base_get_function(query_URL=str(BASE_URL + REQUEST_TYPE[0] + "/factors"),df=df)
+    else:
+        return 'Error in Datatypes'
+ 
+def carbon_from(
+        yr: int = 2017,
+        mn: int = 9,
+        dy: int = 13,
+        hr: int = 0,
+        min: int = 0,
+        df: bool = True,
+        fwh: int = 0
+        ):
+    check = [
+        isinstance(yr, int),
+        isinstance(mn, int),
+        isinstance(dy, int),
+        isinstance(hr, int),
+        isinstance(min, int),
+        isinstance(df, bool)
+    ]
+    if all(check):
+        if date_check(yr_check=yr, mn_check=mn, dy_check=dy) != False and time_check(hr_check=hr, min_check=min) != False:
+            corrected_request_date = dt.datetime.isoformat(dt.datetime(year=yr, month=mn, day=dy, hour=hr, minute=min))
+            if fwh <= 24 and fwh > 0:
+                forward = "Z/fw24h"
+            elif fwh <= 48 and fwh > 24:
+                forward = "Z/fw48h"
+            else:
+                forward = "Z"
+            return base_get_function(query_URL=str(BASE_URL + REQUEST_TYPE[0] + "/" + str(corrected_request_date) + forward),df=df)
+        else:
+            return 'Error: Date and/or Time is invalid'
+    else:
+        return 'Error in Datatypes'
+ 
+def carbon_pt24h(
+        yr: int = 2017,
+        mn: int = 9,
+        dy: int = 14,
+        hr: int = 0,
+        min: int = 0,
+        request_type: str = REQUEST_TYPE[0],
+        df: bool = True
+        ):
+    check = [
+        isinstance(yr, int),
+        isinstance(mn, int),
+        isinstance(dy, int),
+        isinstance(hr, int),
+        isinstance(min, int),
+        isinstance(request_type, str),
+        isinstance(df, bool)
+    ]
+    if all(check):
+        if date_check(yr_check=yr, mn_check=mn, dy_check=dy) != False and time_check(hr_check=hr, min_check=min) != False:
+            corrected_request_date = dt.datetime.isoformat(dt.datetime(year=yr, month=mn, day=dy, hour=hr, minute=min))
+            if request_type == REQUEST_TYPE[1]:
+                request_type = REQUEST_TYPE[1] + "/" + REQUEST_TYPE[0]
+            return base_get_function(query_URL=str(BASE_URL + request_type + "/" + str(corrected_request_date)+"Z/pt24h"),df=df)
+        else:
+            return 'Error: Date and/or Time is invalid'
+    else:
+        return 'Error in Datatypes'
+ 
+def carbon_to(
+        yr: int = 2017,
+        mn: int = 9,
+        dy: int = 13,
+        hr: int = 0,
+        min: int = 0,
+        to: float = 13.9,
+        request_type: str = REQUEST_TYPE[0],
+        df: bool = True
+        ):
+    check = [
+        isinstance(yr, int),
+        isinstance(mn, int),
+        isinstance(dy, int),
+        isinstance(hr, int),
+        isinstance(min, int),
+        isinstance(to, float),
+        isinstance(request_type, str),
+        isinstance(df, bool)
+    ]
+    if all(check):
+        if date_check(yr_check=yr, mn_check=mn, dy_check=dy) != False and time_check(hr_check=hr, min_check=min) != False:
+            if to > 14:
+                return "Error: Please put a number between 0 & 13.9 for the number of days you wish to obtain a report for"
+            corrected_request_date = dt.datetime.isoformat(dt.datetime(year=yr, month=mn, day=dy, hour=hr, minute=min))
+            request_to_date = dt.datetime.isoformat(dt.datetime(year=yr, month=mn, day=dy, hour=hr, minute=min)+dt.timedelta(days=to))
+            if request_type == REQUEST_TYPE[1]:
+                request_type = REQUEST_TYPE[1] + "/" + REQUEST_TYPE[0]
+            return base_get_function(query_URL=str(BASE_URL + request_type + "/" + str(corrected_request_date)+"Z/"+str(request_to_date)),df=df)
+        else:
+            return 'Error: Date and/or Time is invalid'
+    else:
+        return 'Error in Datatypes'
+ 
+def carbon_to_block(
+        yr: int = 2017,
+        mn: int = 9,
+        dy: int = 13,
+        hr: int = 0,
+        min: int = 0,
+        to: float = 19,
+        block: int = 0,
+        df: bool = True
+        ):
+    if type(to) == int:
+        to = float(to)
+    check = [
+        isinstance(yr, int),
+        isinstance(mn, int),
+        isinstance(dy, int),
+        isinstance(hr, int),
+        isinstance(min, int),
+        isinstance(to, float),
+        isinstance(block, int),
+        isinstance(df, bool)
+    ]
+    if all(check):
+        if date_check(yr_check=yr, mn_check=mn, dy_check=dy) != False and time_check(hr_check=hr, min_check=min) != False and (type(block) == int or block == ""):
+            if (block > 0 and block < 2 and to > 18) or (block > 0 and block < 3 and to > 25):
+                return """ERROR: Due to limitations with the API, please input values for 'to' and 'block' as follows:
+    Days Ahead: 25-30, block: minimum 3
+    Days Ahead: 18-24, block: minimum 2
+    Days Ahead:  1-17, block: minimum 1
+    'block' values are in integers between 0 & 24 while 'to' values can be floating numbers between 1 & 30, signifying the number of days"""
+            if to > 30:
+                return """ERROR: Please input an 'int' in the variable 'to' between 1 and 30.
+    Due to limitations with the API, please input values for 'to' and 'block' as follows:
+    Days Ahead: 25-30, block: minimum 3
+    Days Ahead: 18-24, block: minimum 2
+    Days Ahead:  1-17, block: minimum 1
+    'block' values are in integers between 0 & 24 while 'to' values can be floating numbers between 1 & 30, signifying the number of days"""
+            corrected_request_date = dt.datetime.isoformat(dt.datetime(year=yr, month=mn, day=dy, hour=hr, minute=min))
+            request_to_date = dt.datetime.isoformat(dt.datetime(year=yr, month=mn, day=dy, hour=hr, minute=min)+dt.timedelta(days=to))
+            if block == "" or block == 0:
+                url = str(BASE_URL + REQUEST_TYPE[0] + "/stats/" + str(corrected_request_date).replace(":00:00",":00") + "Z/" + str(request_to_date).replace(":00:00",":00") + "Z")
+            else:
+                url = str(BASE_URL + REQUEST_TYPE[0] + "/stats/" + str(corrected_request_date).replace(":00:00",":00") + "Z/" + str(request_to_date).replace(":00:00",":00") + "Z/" + str(block))
+            return base_get_function(query_URL=url,df=df)
+        else:
+            return 'Error: Date and/or Time is invalid'
+    else:
+        return 'Error in Datatypes'
+ 
+def carbon_regional(
+        region: str = "scotland",
+        df: bool = True
+        ):
+    check = [
+        isinstance(region, str),
+        isinstance(df, bool)
+    ]
+    if all(check):
+        return base_get_function(query_URL=str(BASE_URL + REQUEST_TYPE[1] + "/" + region),df=df)
+    else:
+        return 'Error in Datatypes'
+ 
+def carbon_postcode(
+        postcode_area: str = "AB10",
+        df: bool = True
+        ):
+    check = [
+        isinstance(postcode_area, str),
+        isinstance(df, bool)
+    ]
+    if all(check):
+        with open(POSTCODES, 'r', encoding="utf-8") as postcode:
+            post_areas = [line.strip() for line in postcode.readlines()]
+            if postcode_area not in post_areas:
+                return "Please input a valid postcode area"
+            return base_get_function(query_URL=str(BASE_URL + REQUEST_TYPE[1] + "/postcode/" + postcode_area), df=df)
+    else:
+        return 'Error in Datatypes'
+ 
+def carbon_region_all(
+        df: bool = True
+        ):
+    if isinstance(df, bool):
+        for i in REGION_ID:
+            return base_get_function(query_URL=str(BASE_URL + REQUEST_TYPE[1] + "/regionid/" + str(i)), df=df)
+    else:
+        return 'Error in Datatypes'
+ 
+def carbon_postcode_all(
+        df: bool = True
+        ):
+    if isinstance(df, bool):
+        with open(POSTCODES, 'r', encoding="utf-8") as postcode:
+            post_areas = [line.strip() for line in postcode.readlines()]
+            for i in post_areas:
+                print(i)
+                return base_get_function(query_URL=str(BASE_URL + REQUEST_TYPE[1] + "/postcode/" + str(i)), df=df)
+    else:
+        return 'Error in Datatypes'
+ 
+def carbon_region_fw(
+    yr: int = 2018,
+    mn: int = 5,
+    dy: int = 9,
+    hr: int = 0,
+    min: int = 0,
+    fwh: int = 0,
+    df: bool = True
+    ):
+    check = [
+        isinstance(yr, int),
+        isinstance(mn, int),
+        isinstance(dy, int),
+        isinstance(hr, int),
+        isinstance(min, int),
+        isinstance(fwh, int),
+        isinstance(df, bool)
+    ]
+    if all(check):
+        if date_check(yr_check=yr, mn_check=mn, dy_check=dy) != False and time_check(hr_check=hr, min_check=min) != False:
+            corrected_request_date = dt.datetime.isoformat(dt.datetime(year=yr, month=mn, day=dy, hour=hr, minute=min))
+            if fwh <= 24 and fwh > 0:
+                forward = "Z/fw24h"
+            else:
+                forward = "Z/fw48h"
+            return base_get_function(query_URL=str(BASE_URL + REQUEST_TYPE[1] + "/" + REQUEST_TYPE[0] + "/" + str(corrected_request_date) + forward),df=df)
+        else:
+            return 'Error: Date and/or Time is invalid'
+    else:
+        return 'Error in Datatypes'
+ 
+def carbon_post_region_fw(
+    yr: int = 2025,
+    mn: int = 9,
+    dy: int = 13,
+    hr: int = 0,
+    min: int = 0,
+    fwh: int = 0,
+    post_region: str|int = "AB10",
+    df: bool = True
+    ):
+    check = [
+        isinstance(yr, int),
+        isinstance(mn, int),
+        isinstance(dy, int),
+        isinstance(hr, int),
+        isinstance(min, int),
+        isinstance(fwh, int),
+        isinstance(post_region, (str, int)),
+        isinstance(df, bool)
+    ]
+    if all(check):
+        if date_check(yr_check=yr, mn_check=mn, dy_check=dy) != False and time_check(hr_check=hr, min_check=min) != False:
+            corrected_request_date = dt.datetime.isoformat(dt.datetime(year=yr, month=mn, day=dy, hour=hr, minute=min))
+            if fwh <= 24 and fwh > 0:
+                forward = "Z/fw24h"
+            else:
+                forward = "Z/fw48h"
+       
+            with open(POSTCODES, 'r', encoding="utf-8") as postcode:
+                post_areas = [line.strip() for line in postcode.readlines()]
+       
+            if post_region in post_areas:
+                ending = f"/postcode/{post_region}"
+            elif type(post_region) == int and post_region > 0 and post_region < 18:
+                ending = f"/regionid/{post_region}"
+            else:
+                return None
+            return base_get_function(query_URL=str(BASE_URL + REQUEST_TYPE[1] + "/" + REQUEST_TYPE[0] + "/" + str(corrected_request_date) + forward + ending),df=df)
+        else:
+            return 'Error: Date and/or Time is invalid'
+    else:
+        return 'Error in Datatypes'
+ 
+def carbon_post_to(
+    yr: int = 2018,
+    mn: int = 9,
+    dy: int = 13,
+    hr: int = 0,
+    min: int = 0,
+    to: float = 13.9,
+    post_region: str|int = "AB10",
+    df: bool = True
+    ):
+    if type(to) == int:
+        to = float(to)
+    check = [
+        isinstance(yr, int),
+        isinstance(mn, int),
+        isinstance(dy, int),
+        isinstance(hr, int),
+        isinstance(min, int),
+        isinstance(to, float),
+        isinstance(post_region, (str, int)),
+        isinstance(df, bool)
+    ]
+    if all(check):
+        if date_check(yr_check=yr, mn_check=mn, dy_check=dy) != False and time_check(hr_check=hr, min_check=min) != False:
+            if to > 14:
+                return "please put a number between 0 & 14 for the number of days you wish to obtain a report for"
+            corrected_request_date = dt.datetime.isoformat(dt.datetime(year=yr, month=mn, day=dy, hour=hr, minute=min))
+            request_to_date = dt.datetime.isoformat(dt.datetime(year=yr, month=mn, day=dy, hour=hr, minute=min)+dt.timedelta(days=to))
+            request_type = REQUEST_TYPE[1] + "/" + REQUEST_TYPE[0]
+       
+            with open(POSTCODES, 'r', encoding="utf-8") as postcode:
+                post_areas = [line.strip() for line in postcode.readlines()]
+       
+            if post_region in post_areas:
+                ending = f"Z/postcode/{post_region}"
+            elif type(post_region) == int and post_region > 0 and post_region < 18:
+                ending = f"Z/regionid/{post_region}"
+            else:
+                return None
+            return base_get_function(query_URL=str(BASE_URL + request_type + "/" + str(corrected_request_date)+"Z/"+str(request_to_date) + ending),df=df)
+        else:
+            return 'Error: Date and/or Time is invalid'
+    else:
+        return 'Error in Datatypes'
+
+# Normalising data
+def fueltype_demand(
+        fuel_type: str = '',
+        publishDateTimeFrom: str = '',
+        publishDateTimeTo: str = ''
+    ):
+    fuelR = ''
+    publishR = ''
+    if all([fuel_type, publishDateTimeFrom, publishDateTimeTo]) == '':
+        request_string = 'https://data.elexon.co.uk/bmrs/api/v1/datasets/UOU2T14D'
+    else:
+        if fuel_type != '':
+            fuelR = f'?fuel_type={fuel_type}'
+        if publishDateTimeFrom != '':
+            if fuelR != '':
+                publishR = f'&publishDateTimeFrom={publishDateTimeFrom}&publishDateTimeTo={publishDateTimeTo}'
+            else:
+                publishR = f'?publishDateTimeFrom={publishDateTimeFrom}&publishDateTimeTo={publishDateTimeTo}'
+        request_string = f'https://data.elexon.co.uk/bmrs/api/v1/datasets/UOU2T14D{fuelR}{publishR}'
+    response = requests.get(request_string, params={}, headers = HEADERS)
+    if response.status_code == 200:
+        data = response.json()
+    df0 = pd.json_normalize(data['data'])
+    return df0
+
+def energy_demand(
+        setDateFrom: str = '',
+        setDateTo: str = '',
+        setPeriod: list[int] = ''
+    ):
+    datesR = ''
+    periodR = ''
+    if all([setDateFrom, setDateTo, setPeriod]) == '':
+        request_string = 'https://data.elexon.co.uk/bmrs/api/v1/demand/outturn'
+    else:
+        if setDateFrom != '':
+            datesR = f'?settlementDateFrom={setDateFrom}&settlementDateTo={setDateTo}'
+        if setPeriod != '':
+            if datesR != '':
+                periodR = f'&settlementPeriod={setPeriod}'
+            else:
+                periodR = f'?settlementPeriod={setPeriod}'
+        request_string = f'https://data.elexon.co.uk/bmrs/api/v1/demand/outturn{datesR}{periodR}'
+    response = requests.get(request_string, params={}, headers = HEADERS)
+    if response.status_code == 200:
+        data = response.json()
+    df0 = pd.json_normalize(data['data'])
+    return df0
+
+def temp_data(
+        publishDateTimeFrom: str = '',
+        publishDateTimeTo: str = ''
+    ):
+    if publishDateTimeFrom == '':
+        request_string = 'https://data.elexon.co.uk/bmrs/api/v1/datasets/TEMP'
+    else:
+        request_string = f'https://data.elexon.co.uk/bmrs/api/v1/datasets/TEMP?publishDateTimeFrom={publishDateTimeFrom}&publishDateTimeTo={publishDateTimeTo}'
+    response = requests.get(request_string, params={}, headers = HEADERS)
+    if response.status_code == 200:
+        data = response.json()
+    df0 = pd.json_normalize(data['data'])
+    return df0
+
+# Boilerplate code
+if __name__ == '__main__':
+    df = temp_data()
+    print(df)
