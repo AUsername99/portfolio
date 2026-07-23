@@ -108,7 +108,9 @@ The third one is the temperature data for the UK, as recorded by 6 weather stati
 
 Tracking and centralising all of this data is good for being able to see how much CO2 and other gases the UK is actually producing on a daily, monthly and yearly level but since Climate Change isn't a country by country issue, it becomes hard to see how much the UK is actually impacting the environment as a whole. If I had the exact same data outputs from every other country in the world then it would be a lot easier to measure said fact.
 
-There is a possible way by normalising this data to the estimated amount of greenhouse gases in the atmosphere and removing the amount added in from natural disaters (at least the ones not derived from climate change that is).
+There is a possible way by normalising this data to the estimated amount of greenhouse gases in the atmosphere and removing the amount added in from natural disaters (at least the ones not derived from climate change that is). From there it could be estabilshed on how much the UK is directly responsible for.
+
+A second improvement would be to track Northern Irelands emmissions as well as all the british territories to get a more definitive figure. It may not add a significant amount but it would either uncover a large source of emmissions that was not looked into or at least make sure the data is as whole as it can be.
 
 ---
 
@@ -117,5 +119,6 @@ There is a possible way by normalising this data to the estimated amount of gree
 Carbon Intensity API: https://carbon-intensity.github.io/api-definitions/?python#carbon-intensity-api-v2-0-0
 UK Energy Production API: https://developer.data.elexon.co.uk/api-details
 NO2 Statistics: https://www.gov.uk/government/statistics/air-quality-statistics/ntrogen-dioxide
-Vehicle Data:https://www.gov.uk/government/statistical-data-sets/vehicle-licensing-statistics-data-tables
+Vehicle Data: https://www.gov.uk/government/statistical-data-sets/vehicle-licensing-statistics-data-tables
+Vehicle Distance Travelled Data: https://roadtraffic.dft.gov.uk/downloads
 Kate Morley's Live Dashboard: https://grid.iamkate.com/
